@@ -1,17 +1,85 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Register</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register | Flight Updates</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        margin: 0;
+        font-family: 'Roboto', sans-serif;
+        background: linear-gradient(to right, #e0f7fa, #b3e5fc);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    .card {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        width: 350px;
+        text-align: center;
+    }
+    h2 {
+        margin-bottom: 1.5rem;
+        color: #0277bd;
+    }
+    input[type="text"], input[type="password"] {
+        width: 100%;
+        padding: 12px 15px;
+        margin: 8px 0;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        outline: none;
+        font-size: 1rem;
+    }
+    input[type="submit"] {
+        width: 100%;
+        padding: 12px;
+        background: #03a9f4;
+        border: none;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    input[type="submit"]:hover {
+        background: #0288d1;
+    }
+    .footer-text {
+        margin-top: 1rem;
+        font-size: 0.9rem;
+    }
+    .footer-text a {
+        color: #0288d1;
+        text-decoration: none;
+    }
+    .footer-text a:hover {
+        text-decoration: underline;
+    }
+</style>
 </head>
 <body>
-    <h2>Sign Up</h2>
-    <form method="post" action="/authentication/register">
-        <label>Username:</label>
-        <input type="text" name="username" required /><br/><br/>
-        <label>Password:</label>
-        <input type="password" name="password" required /><br/><br/>
-        <button type="submit">Register</button>
+<div class="card">
+    <h2>Register</h2>
+    {% if error %}
+        <p style="color:red; margin-bottom: 1rem;">{{ error }}</p>
+    {% endif %}
+    {% if success %}
+        <p style="color:green; margin-bottom: 1rem;">{{ success }}</p>
+    {% endif %}
+    <form method="POST" action="/authentication/register">
+        <input type="text" name="username" placeholder="Username" value="{{ username if username }}" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <input type="submit" value="Register">
     </form>
-    <p>Already have an account? <a href="/authentication/login">Login here</a></p>
+    <div class="footer-text">
+        Already have an account? <a href="/authentication/login">Login</a>
+    </div>
+</div>
 </body>
 </html>

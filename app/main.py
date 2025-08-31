@@ -2,12 +2,13 @@
 from fastapi import FastAPI
 from app.routes import authentication, flight  # import your routers
 from app.database import Base, engine
+from fastapi.staticfiles import StaticFiles
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Flight Updates Service", version="1.0")
-
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 # Include routers
 app.include_router(authentication.router, prefix="/authentication", tags=["Authentication"])
 app.include_router(flight.router, tags=["Flights"])  # no prefix to keep /flights as URL

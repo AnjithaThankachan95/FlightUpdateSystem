@@ -1,22 +1,61 @@
 <!DOCTYPE html>
-<html>
-<head><title>Flight Status</title></head>
-<body>
-<h2>Welcome {{ username }}</h2>
-<form method="POST">
-    <input type="hidden" name="token" value="{{ request.query_params['token'] }}">
-    <input type="text" name="flight_number" placeholder="Enter Flight Number" required>
-    <input type="submit" value="Check Status">
-</form>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Status</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-blue-50 min-h-screen flex flex-col items-center py-8">
 
-{% if flight_info %}
-<h3>Flight Info</h3>
-<p>Flight Number: {{ flight_info.flight_number }}</p>
-<p>Departure: {{ flight_info.departure }}</p>
-<p>Arrival: {{ flight_info.arrival }}</p>
-<p>Status: {{ flight_info.status }}</p>
-{% endif %}
+    <!-- Header -->
+    <h1 class="text-3xl font-bold text-blue-800 mb-6 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.343-3 3v8h6v-8c0-1.657-1.343-3-3-3z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v5m0 0H9m3 0h3" />
+        </svg>
+        Flight Tracker
+    </h1>
 
-<a href="/authentication/login">Logout</a>
+    <!-- Flight Input Card -->
+    <div class="bg-white shadow-lg rounded-xl p-6 w-full max-w-md">
+        <p class="text-gray-700 mb-4">Welcome, <span class="font-semibold">{{ username }}</span></p>
+        <form method="POST" class="flex flex-col gap-4">
+            <input type="hidden" name="token" value="{{ request.query_params['token'] }}">
+            <input type="text" name="flight_number" placeholder="Enter Flight Number" required
+                   class="border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+            <button type="submit"
+                    class="bg-blue-500 text-white font-semibold py-2 rounded-lg hover:bg-blue-600 transition duration-200">
+                Check Status
+            </button>
+            <button
+                type="button"
+                onclick="clearInput()"
+                class="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400"
+            >
+                Clear
+            </button>
+        </form>
+    </div>
+
+    <!-- Flight Info Card -->
+    {% if flight_info %}
+    <div class="bg-white shadow-lg rounded-xl p-6 mt-6 w-full max-w-md">
+        <h2 class="text-xl font-bold text-blue-800 mb-2">Flight Information</h2>
+        <p><span class="font-semibold">Flight Number:</span> {{ flight_info.flight_number }}</p>
+        <p><span class="font-semibold">Departure:</span> {{ flight_info.departure }}</p>
+        <p><span class="font-semibold">Arrival:</span> {{ flight_info.arrival }}</p>
+        <p><span class="font-semibold">Status:</span> {{ flight_info.status }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Logout -->
+    <a href="/authentication/login" class="mt-6 text-blue-600 hover:underline">Logout</a>
+    <script>
+        function clearInput() {
+            document.querySelector('input[name="flight_number"]').value = '';
+        }
+    </script>
+
 </body>
 </html>

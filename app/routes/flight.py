@@ -1,48 +1,72 @@
-from fastapi import APIRouter, Depends, Query, HTTPException, Request, Form
+# app/routes/flight.py
+from fastapi import APIRouter, Depends, Form, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.services.flightservice import get_flight_status
-from app.services.tokenservice import get_current_user  # use only this
+from app.routes.authentication import get_current_user
+from app.services.tokenservice import create_access_token
+from jose import JWTError
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
 
-# ----------------------------
-# Show flight page (GET)
-# ----------------------------
+# ---------------------------
+# Show flights page (GET)
+# ---------------------------
 @router.get("/flights", response_class=HTMLResponse)
-def flights(
-    request: Request,
-    token: str,
-    db: Session = Depends(get_db)
-):
-    user = get_current_user(token, db)
+def flights_page(request: Request, token: str, db: Session = Depends(get_db)):
+    try:
+        user = get_current_user(token, db)
+    except JWTError:
+        # Token invalid or expired
+        return templates.TemplateResponse(
+            "login.html",
+            {"request": request, "error": "Session expired, please log in again."}
+        )
+    
     return templates.TemplateResponse(
         "flights.html",
         {"request": request, "username": user.username, "flight_info": None}
     )
 
 
-# ----------------------------
-# Handle form submission (POST)
-# ----------------------------
+# ---------------------------
+# Handle flight tracking (POST)
+# ---------------------------
 @router.post("/flights", response_class=HTMLResponse)
-def track_flight(
-    request: Request,
-    flight_number: str = Form(...),
-    token: str = Form(...),
-    db: Session = Depends(get_db)
-):
-    user = get_current_user(token, db)
+def track_flight(request: Request, flight_number: str = Form(...), token: str = Form(...), db: Session = Depends(get_db)):
+    try:
+        user = get_current_user(token, db)
+    except JWTError:
+        return templates.TemplateResponse(
+            "login.html",
+            {"request": request, "error": "Session expired, please log in again."}
+        )
+    
     flight_data = get_flight_status(flight_number)
-
+    
     if not flight_data:
-        raise HTTPException(status_code=404, detail="Flight not found")
-
+        # Log the API response for debugging
+        print(f"Flight not found for flight_number={flight_number}")
+        return templates.TemplateResponse(
+            "flights.html",
+            {
+                "request": request,
+                "username": user.username,
+                "flight_info": None,
+                "error": f"No data found for flight {flight_number}. Try again later."
+            }
+        )
+    
     return templates.TemplateResponse(
         "flights.html",
-        {"request": request, "username": user.username, "flight_info": flight_data}
+        {
+            "request": request,
+            "username": user.username,
+            "flight_info": flight_data,
+            "error": None
+        }
     )
