@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head><title>Flight Status</title></head>
+<body>
+<h2>Welcome {{ username }}</h2>
+<form method="POST">
+    <input type="hidden" name="token" value="{{ request.query_params['token'] }}">
+    <input type="text" name="flight_number" placeholder="Enter Flight Number" required>
+    <input type="submit" value="Check Status">
+</form>
+
+{% if flight_info %}
+<h3>Flight Info</h3>
+<p>Flight Number: {{ flight_info.flight_number }}</p>
+<p>Departure: {{ flight_info.departure }}</p>
+<p>Arrival: {{ flight_info.arrival }}</p>
+<p>Status: {{ flight_info.status }}</p>
+{% endif %}
+
+<a href="/authentication/login">Logout</a>
+</body>
+</html>
