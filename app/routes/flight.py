@@ -17,56 +17,72 @@ templates = Jinja2Templates(directory="app/templates")
 # Show flights page (GET)
 # ---------------------------
 @router.get("/flights", response_class=HTMLResponse)
-def flights_page(request: Request, token: str, db: Session = Depends(get_db)):
-    try:
-        user = get_current_user(token, db)
-    except JWTError:
-        # Token invalid or expired
+def flights_page(request: Request, token: str = None, db: Session = Depends(get_db)):
+    if not token:
+        # No token, redirect to login
         return templates.TemplateResponse(
             "login.html",
-            {"request": request, "error": "Session expired, please log in again."}
+            {"request": request, "error": "Please login first."}
         )
     
+    try:
+        user = get_current_user(token, db)
+    except Exception:
+        return templates.TemplateResponse(
+            "login.html",
+            {"request": request, "error": "Session expired or invalid. Please log in again."}
+        )
+    
+    # Render flights page with empty flight info
     return templates.TemplateResponse(
         "flights.html",
-        {"request": request, "username": user.username, "flight_info": None}
+        {
+            "request": request,
+            "username": user.username,
+            "flight_info": None,
+            "token": token,
+            "error": None
+        }
     )
-
 
 # ---------------------------
 # Handle flight tracking (POST)
 # ---------------------------
 @router.post("/flights", response_class=HTMLResponse)
-def track_flight(request: Request, flight_number: str = Form(...), token: str = Form(...), db: Session = Depends(get_db)):
+def track_flight(
+    request: Request,
+    flight_number: str = Form(...),
+    token: str = Form(...),
+    db: Session = Depends(get_db)
+):
     try:
         user = get_current_user(token, db)
     except JWTError:
         return templates.TemplateResponse(
             "login.html",
-            {"request": request, "error": "Session expired, please log in again."}
+            {"request": request, "error": "Session expired or invalid. Please log in again."}
         )
-    
+
     flight_data = get_flight_status(flight_number)
-    
-    if not flight_data:
-        # Log the API response for debugging
-        print(f"Flight not found for flight_number={flight_number}")
+
+    if not flight_data or not flight_data.get('flight_number'):
         return templates.TemplateResponse(
             "flights.html",
             {
                 "request": request,
                 "username": user.username,
                 "flight_info": None,
-                "error": f"No data found for flight {flight_number}. Try again later."
+                "error": f"No flight data found for flight number: {flight_number}",
+                "token": token,
             }
         )
-    
     return templates.TemplateResponse(
         "flights.html",
         {
             "request": request,
             "username": user.username,
             "flight_info": flight_data,
-            "error": None
+            "error": None,
+            "token": token
         }
     )

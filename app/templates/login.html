@@ -17,12 +17,15 @@
     {% endif %}
 
     <form method="POST" action="/authentication/login" class="flex flex-col gap-4">
-        <input type="text" name="username" placeholder="Username" 
-               class="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:outline-none" required>
-        <input type="password" name="password" placeholder="Password" 
-               class="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:outline-none" required>
-        <input type="submit" value="Login" 
-               class="bg-blue-500 text-white font-semibold py-3 rounded-lg hover:bg-blue-600 transition duration-200 cursor-pointer">
+    <input type="text" name="username" placeholder="Username"
+           value="{{ username or '' }}"  
+           class="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:outline-none" required>
+
+    <input type="password" name="password" placeholder="Password"
+           class="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:outline-none" required>
+
+    <input type="submit" value="Login"
+           class="bg-blue-500 text-white font-semibold py-3 rounded-lg hover:bg-blue-600 transition duration-200 cursor-pointer">
     </form>
 
     <div class="mt-4 text-gray-600 text-sm">

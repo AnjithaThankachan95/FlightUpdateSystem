@@ -15,15 +15,25 @@ ALGORITHM = os.getenv("ALGORITHM", "HS256")
 def create_access_token(data: dict):
     return jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
 
-def get_current_user(token: str, db: Session = Depends(get_db)):
+from jose import jwt, JWTError
+from app.models.usermodel import User
+from sqlalchemy.orm import Session
+
+def get_current_user(token: str, db: Session) -> User:
+
+    # Decode JWT token and return User object from DB. 
+    # Raises JWTError if token invalid or expired.
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username = payload.get("sub")
+        username: str = payload.get("sub")
         if username is None:
-            raise HTTPException(status_code=401, detail="Invalid token")
-        user = db.query(User).filter(User.username == username).first()
-        if not user:
-            raise HTTPException(status_code=401, detail="User not found")
-        return user
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+            raise JWTError("Token missing subject")
+    except JWTError as e:
+        raise JWTError("Invalid token") from e
+
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        raise JWTError("User not found")
+    
+    return user

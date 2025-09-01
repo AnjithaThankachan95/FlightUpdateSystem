@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flight Status</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flight Status</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-blue-50 min-h-screen flex flex-col items-center py-8">
 
@@ -17,13 +17,19 @@
         Flight Tracker
     </h1>
 
-    <!-- Flight Input Card -->
+    <!-- Flight Search Card -->
     <div class="bg-white shadow-lg rounded-xl p-6 w-full max-w-md">
         <p class="text-gray-700 mb-4">Welcome, <span class="font-semibold">{{ username }}</span></p>
         <form method="POST" class="flex flex-col gap-4">
-            <input type="hidden" name="token" value="{{ request.query_params['token'] }}">
-            <input type="text" name="flight_number" placeholder="Enter Flight Number" required
-                   class="border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+            <input type="hidden" name="token" value="{{ token }}">
+            <input 
+                type="text" 
+                name="flight_number" 
+                placeholder="Enter Flight Number" 
+                value="{% if flight_info %}{{ flight_info.flight_number }}{% else %}{% endif %}" 
+                required
+                class="border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+
             <button type="submit"
                     class="bg-blue-500 text-white font-semibold py-2 rounded-lg hover:bg-blue-600 transition duration-200">
                 Check Status
@@ -31,31 +37,73 @@
             <button
                 type="button"
                 onclick="clearInput()"
-                class="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400"
-            >
+                class="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400">
                 Clear
             </button>
         </form>
     </div>
 
+    <!-- Error Message -->
+    {% if error %}
+    <div id="error-message" class="bg-red-100 text-red-700 px-4 py-2 rounded mb-4 w-full max-w-md">
+        {{ error }}
+    </div>
+    {% else %}
+    <div id="error-message" style="display:none;"></div>
+    {% endif %}
+
     <!-- Flight Info Card -->
     {% if flight_info %}
-    <div class="bg-white shadow-lg rounded-xl p-6 mt-6 w-full max-w-md">
+    <div id="flight-info-card" class="bg-white shadow-lg rounded-xl p-6 mt-6 w-full max-w-md">
         <h2 class="text-xl font-bold text-blue-800 mb-2">Flight Information</h2>
         <p><span class="font-semibold">Flight Number:</span> {{ flight_info.flight_number }}</p>
         <p><span class="font-semibold">Departure:</span> {{ flight_info.departure }}</p>
         <p><span class="font-semibold">Arrival:</span> {{ flight_info.arrival }}</p>
         <p><span class="font-semibold">Status:</span> {{ flight_info.status }}</p>
     </div>
+    {% else %}
+    <div id="flight-info-card" style="display:none;"></div>
     {% endif %}
 
     <!-- Logout -->
     <a href="/authentication/login" class="mt-6 text-blue-600 hover:underline">Logout</a>
-    <script>
-        function clearInput() {
-            document.querySelector('input[name="flight_number"]').value = '';
+
+<script>
+const flightInput = document.querySelector('input[name="flight_number"]');
+const flightCard = document.querySelector('#flight-info-card');
+const errorDiv = document.querySelector('#error-message');
+
+function clearInput() {
+    // Clear input
+    flightInput.value = '';
+
+    // Clear flight info card
+    if (flightCard) {
+        flightCard.innerHTML = '';
+        flightCard.style.display = 'none';
+    }
+
+    // Clear error message
+    if (errorDiv) {
+        errorDiv.innerHTML = '';
+        errorDiv.style.display = 'none';
+    }
+}
+
+// Listen for manual input changes
+flightInput.addEventListener('input', () => {
+    if (flightInput.value.trim() === '') {
+        if (flightCard) {
+            flightCard.innerHTML = '';
+            flightCard.style.display = 'none';
         }
-    </script>
+        if (errorDiv) {
+            errorDiv.innerHTML = '';
+            errorDiv.style.display = 'none';
+        }
+    }
+});
+</script>
 
 </body>
 </html>
